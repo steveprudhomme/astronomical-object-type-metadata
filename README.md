@@ -14,4 +14,5 @@ Initialisation de GPT-2 : Chargement du modèle GPT-2 et du tokenizer à partir 
 Fonction generate_text : Cette fonction génère du texte en utilisant GPT-2 basé sur un prompt donné.
 Boucle sur les lignes du DataFrame : Pour chaque ligne, le script utilise GPT-2 pour générer les définitions des types, sous-types et exemples, puis les insère dans les colonnes appropriées.
 Sauvegarde du fichier Excel mis à jour : Le fichier Excel est sauvegardé avec les nouvelles informations générées par GPT-2.
-Ce script devrait vous permettre de générer les définitions et notes explicatives directement à l'aide de GPT-2 en mode local et en français. Si vous avez des questions ou des ajustements à faire, n'hésitez pas à me le faire savoir !
+Échappement des guillemets simples : Dans la ligne où vous avez rencontré l'erreur, j'ai échappé le guillemet simple dans l'exemple en utilisant une barre oblique inversée (\). Cela permet d'éviter la confusion avec la fin de la chaîne de caractères.
+Ce script devrait maintenant fonctionner correctement et générer des définitions en français pour les types, sous-types et exemples dans votre fichier Excel. Si vous rencontrez d'autres problèmes ou avez besoin d'ajustements supplémentaires, n'hésitez pas à me le faire savoir !
