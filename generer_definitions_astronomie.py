@@ -1,19 +1,20 @@
 import pandas as pd
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 
 # Charger le fichier Excel
 df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
 
-# Initialiser le modèle GPT-2 et le tokenizer
-model_name = "gpt2"
-tokenizer = GPT2Tokenizer.from_pretrained(model_name)
-model = GPT2LMHeadModel.from_pretrained(model_name)
+# Initialiser le modèle LLaMA 3 et le tokenizer
+model_name = "meta-llama/LLaMA-3"  # Remplacez par le chemin correct vers le modèle LLaMA 3
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
 
-# Fonction pour générer du texte avec GPT-2 en français
+# Fonction pour générer du texte avec LLaMA 3 en français
 def generate_text(prompt):
     inputs = tokenizer.encode(prompt, return_tensors="pt")
-    outputs = model.generate(inputs, max_length=100, num_return_sequences=1)
+    attention_mask = torch.ones(inputs.shape, dtype=torch.long)
+    outputs = model.generate(inputs, max_length=100, num_return_sequences=1, attention_mask=attention_mask, pad_token_id=tokenizer.eos_token_id)
     text = tokenizer.decode(outputs[0], skip_special_tokens=True)
     return text
 
@@ -30,4 +31,4 @@ for index, row in df.iterrows():
 # Sauvegarder le fichier Excel mis à jour
 df.to_excel('updated_table_with_definitions.xlsx', index=False)
 
-print("Le fichier Excel a été mis à jour avec des définitions générées par GPT-2 en français.")
+print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA 3 en français.")
