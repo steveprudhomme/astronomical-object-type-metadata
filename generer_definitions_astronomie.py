@@ -42,12 +42,23 @@ for index, row in df.iterrows():
     example_query = row['Exemple']
     
     df.at[index, 'Définition du type'] = str(generate_text(f"Définition du type d'objet astronomique {type_query} en français:"))
+    
+    # Sauvegarder le fichier Excel mis à jour après chaque définition
+    df.to_excel(f'updated_table_with_definitions_{index + 1}_type.xlsx', index=False)
+    
     df.at[index, 'Définition du sous-type'] = str(generate_text(f"Définition du sous-type d'objet astronomique {subtype_query} de type {type_query} en français:"))
+    
+    # Sauvegarder le fichier Excel mis à jour après chaque définition
+    df.to_excel(f'updated_table_with_definitions_{index + 1}_subtype.xlsx', index=False)
+    
     df.at[index, 'Note explicative sur l\'exemple'] = str(generate_text(f"Note explicative sur l'exemple d'objet astronomique {type_query}, {subtype_query}, {example_query} en français:"))
+    
+    # Sauvegarder le fichier Excel mis à jour après chaque définition
+    df.to_excel(f'updated_table_with_definitions_{index + 1}_example.xlsx', index=False)
 
 print("Traitement des lignes terminé. Sauvegarde du fichier Excel...")
 
-# Sauvegarder le fichier Excel mis à jour
-df.to_excel('updated_table_with_definitions.xlsx', index=False)
+# Sauvegarder le fichier Excel final mis à jour
+df.to_excel('updated_table_with_definitions_final.xlsx', index=False)
 
 print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
