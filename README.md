@@ -1,3 +1,59 @@
+### 2025-01-02 23h38
+Pour installer `AutoTokenizer` de la bibliothèque `transformers`, vous devez d'abord installer la bibliothèque `transformers` elle-même. Voici les étapes pour installer `transformers` et utiliser `AutoTokenizer` :
+
+#### Étapes pour installer `transformers` et utiliser `AutoTokenizer`
+
+1. **Installer la bibliothèque `transformers`** :
+   Vous pouvez installer `transformers` en utilisant `pip`. Ouvrez votre terminal ou invite de commandes et exécutez la commande suivante :
+   ```bash
+   pip install transformers
+   ```
+
+2. **Installer `torch`** :
+   La bibliothèque `transformers` dépend de `torch` (PyTorch). Si vous ne l'avez pas déjà installé, vous pouvez l'installer avec la commande suivante :
+   ```bash
+   pip install torch
+   ```
+
+3. **Utiliser `AutoTokenizer` dans votre script** :
+   Une fois les bibliothèques installées, vous pouvez utiliser `AutoTokenizer` dans votre script Python. Voici un exemple de code pour initialiser et utiliser `AutoTokenizer` :
+
+   ```python
+   from transformers import AutoTokenizer, AutoModelForCausalLM
+
+   # Spécifiez le modèle que vous souhaitez utiliser
+   model_name = "EleutherAI/gpt-neox-20b"  # Remplacez par le modèle de votre choix
+
+   # Initialiser le tokenizer et le modèle
+   tokenizer = AutoTokenizer.from_pretrained(model_name)
+   model = AutoModelForCausalLM.from_pretrained(model_name)
+
+   # Exemple d'utilisation du tokenizer
+   prompt = "Définition du type A en français:"
+   inputs = tokenizer.encode(prompt, return_tensors="pt")
+   outputs = model.generate(inputs, max_length=100, num_return_sequences=1)
+   text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+   print(text)
+   ```
+
+#### Résumé des étapes :
+1. **Installer `transformers`** :
+   ```bash
+   pip install transformers
+   ```
+
+2. **Installer `torch`** :
+   ```bash
+   pip install torch
+   ```
+
+3. **Utiliser `AutoTokenizer`** :
+   - Importer `AutoTokenizer` et `AutoModelForCausalLM` depuis `transformers`.
+   - Initialiser le tokenizer et le modèle avec le nom du modèle souhaité.
+   - Utiliser le tokenizer pour encoder un prompt et générer du texte avec le modèle.
+
+Si vous avez des questions supplémentaires ou avez besoin d'aide pour ajuster le script, n'hésitez pas à me le faire savoir !
 ### 2025-01-02 23h11 3
 Le chemin que vous avez mentionné, `C:\Users\steve\.ollama\models\manifests\registry.ollama.ai\library\llama3`, semble être un chemin vers un répertoire de manifestes de modèles. Cependant, pour utiliser le modèle LLaMA 3 avec `transformers`, vous devez pointer vers le répertoire contenant les fichiers du modèle et du tokenizer eux-mêmes, pas seulement les manifestes.
 
