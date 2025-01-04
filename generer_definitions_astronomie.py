@@ -18,8 +18,8 @@ for index, row in df.iterrows():
     subtype_query = row['Sous-Type']
     example_query = row['Exemple']
     
-    df.at[index, 'Définition du type'] = generate_text(f"Définition du type {type_query} en français:")
-    df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type {subtype_query} en français:")
+    df.at[index, 'Définition du type'] = generate_text(f"Définition du type d'objet astronomique {type_query} en français:")
+    df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type d'objet astronomique {subtype_query} en français:")
     df.at[index, 'Note explicative sur l\'exemple'] = generate_text(f"Note explicative sur l'exemple de sous-type d'objets astronomiques {example_query} en français:")
 
 # Sauvegarder le fichier Excel mis à jour
