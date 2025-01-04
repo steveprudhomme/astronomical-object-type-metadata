@@ -1,3 +1,59 @@
+### 2025-01-03 00h24
+L'erreur que vous rencontrez indique que la commande `ollama serve` ne prend pas d'arguments. Pour servir un modèle avec Ollama, vous devez d'abord configurer Ollama pour qu'il utilise le modèle souhaité, puis démarrer le serveur sans spécifier le modèle en argument.
+
+#### Étapes pour servir un modèle avec Ollama
+
+1. **Configurer Ollama pour utiliser le modèle** :
+   Utilisez la commande `ollama pull` pour télécharger le modèle souhaité. Par exemple :
+   ```bash
+   ollama pull llama3.3:70b-instruct-q2_K
+   ```
+
+2. **Servir le modèle** :
+   Une fois le modèle téléchargé, démarrez le serveur Ollama sans spécifier d'arguments :
+   ```bash
+   ollama serve
+   ```
+
+3. **Interagir avec le modèle via l'API locale** :
+   Une fois le serveur démarré, vous pouvez interagir avec le modèle via une API locale. Voici un exemple de script Python pour interagir avec le modèle via l'API locale :
+
+   ```python
+   import requests
+   import pandas as pd
+
+   # Charger le fichier Excel
+   df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
+
+   # Fonction pour générer du texte avec l'API locale d'Ollama
+   def generate_text(prompt):
+       response = requests.post(
+           "http://localhost:11434/api/generate",  # Assurez-vous que l'API locale est accessible à cette adresse
+           json={"model": "llama3.3:70b-instruct-q2_K", "prompt": prompt}
+       )
+       return response.json()["text"]
+
+   # Parcourir les lignes du DataFrame et remplir les colonnes
+   for index, row in df.iterrows():
+       type_query = row['Type']
+       subtype_query = row['Sous-Type']
+       example_query = row['Exemple']
+       
+       df.at[index, 'Définition du type'] = generate_text(f"Définition du type {type_query} en français:")
+       df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type {subtype_query} en français:")
+       df.at[index, 'Note explicative sur l'exemple'] = generate_text(f"Note explicative sur l'exemple {example_query} en français:")
+
+   # Sauvegarder le fichier Excel mis à jour
+   df.to_excel('updated_table_with_definitions.xlsx', index=False)
+
+   print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
+   ```
+
+#### Remarques :
+- **API locale** : Assurez-vous que l'API locale d'Ollama est accessible à l'adresse spécifiée (`http://localhost:11434/api/generate`).
+- **Configuration d'Ollama** : Utilisez les commandes `ollama pull` et `ollama serve` pour gérer et servir les modèles.
+
+Si vous avez des questions supplémentaires ou avez besoin d'aide pour ajuster le script, n'hésitez pas à me le faire savoir !
 ### 2025-01-03 00h21
 Il semble que le fichier blob que vous avez ne soit pas un fichier d'archive standard comme gzip, bzip2, xz ou tar. Cela signifie que nous devons trouver une autre méthode pour extraire ou utiliser ce fichier.
 

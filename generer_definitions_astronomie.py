@@ -8,7 +8,7 @@ df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
 def generate_text(prompt):
     response = requests.post(
         "http://localhost:11434/api/generate",  # Assurez-vous que l'API locale est accessible à cette adresse
-        json={"model": "llama3-70b", "prompt": prompt}
+        json={"model": "llama3.3:70b-instruct-q2_K", "prompt": prompt}
     )
     return response.json()["text"]
 
