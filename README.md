@@ -1,3 +1,78 @@
+### 2025-01-03 00h15
+Il semble que Ollama installe les modèles sous forme de blobs, ce qui peut compliquer l'utilisation directe des fichiers de modèle avec des bibliothèques comme `transformers`. Voici quelques étapes pour gérer cette situation et extraire les fichiers nécessaires :
+
+### Étapes pour extraire les fichiers de modèle à partir d'un blob
+
+1. **Identifier le fichier blob** :
+   Vous avez mentionné que le fichier blob est situé dans `C:\Users\steve\.ollama\models\blobs` et qu'il a un nom de type SHA-256. Assurez-vous que ce fichier est bien le modèle que vous souhaitez utiliser.
+
+2. **Extraire les fichiers du modèle** :
+   Vous pouvez utiliser des outils comme `tar`, `unzip`, ou des scripts Python pour extraire les fichiers du modèle à partir du blob. Voici un exemple de script Python pour extraire les fichiers :
+
+   ```python
+   import tarfile
+   import os
+
+   blob_path = "C:/Users/steve/.ollama/models/blobs/sha256-<votre_hash>"  # Remplacez par le chemin correct vers le fichier blob
+   extract_path = "C:/Users/steve/.ollama/models/llama3"  # Chemin où vous souhaitez extraire les fichiers
+
+   # Assurez-vous que le répertoire de destination existe
+   os.makedirs(extract_path, exist_ok=True)
+
+   # Extraire les fichiers du blob
+   with tarfile.open(blob_path, "r:*") as tar:
+       tar.extractall(path=extract_path)
+
+   print(f"Les fichiers ont été extraits dans {extract_path}")
+   ```
+
+3. **Utiliser les fichiers extraits dans votre script** :
+   Une fois les fichiers extraits, vous pouvez les utiliser dans votre script Python avec `transformers`. Voici comment adapter votre script :
+
+   ```python
+   import pandas as pd
+   from transformers import AutoModelForCausalLM, AutoTokenizer
+   import torch
+
+   # Charger le fichier Excel
+   df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
+
+   # Initialiser le modèle LLaMA et le tokenizer à partir des fichiers locaux
+   model_path = "C:/Users/steve/.ollama/models/llama3"  # Chemin vers le répertoire contenant les fichiers extraits
+   tokenizer_path = "C:/Users/steve/.ollama/models/llama3"  # Chemin vers le répertoire contenant le tokenizer
+
+   tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+   model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16)
+
+   # Fonction pour générer du texte avec LLaMA en français
+   def generate_text(prompt):
+       inputs = tokenizer.encode(prompt, return_tensors="pt")
+       attention_mask = torch.ones(inputs.shape, dtype=torch.long)
+       outputs = model.generate(inputs, max_length=100, num_return_sequences=1, attention_mask=attention_mask, pad_token_id=tokenizer.eos_token_id)
+       text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+       return text
+
+   # Parcourir les lignes du DataFrame et remplir les colonnes
+   for index, row in df.iterrows():
+       type_query = row['Type']
+       subtype_query = row['Sous-Type']
+       example_query = row['Exemple']
+       
+       df.at[index, 'Définition du type'] = generate_text(f"Définition du type {type_query} en français:")
+       df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type {subtype_query} en français:")
+       df.at[index, 'Note explicative sur l'exemple'] = generate_text(f"Note explicative sur l'exemple {example_query} en français:")
+
+   # Sauvegarder le fichier Excel mis à jour
+   df.to_excel('updated_table_with_definitions.xlsx', index=False)
+
+   print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
+   ```
+
+### Remarques :
+- **Chemin correct** : Assurez-vous que le chemin spécifié (`C:/Users/steve/.ollama/models/llama3`) pointe vers le répertoire contenant les fichiers extraits du modèle et du tokenizer de LLaMA.
+- **Extraction des fichiers** : Utilisez le script Python ou un autre outil pour extraire les fichiers nécessaires à partir du blob.
+
+Si vous avez des questions supplémentaires ou avez besoin d'aide pour ajuster le script, n'hésitez pas à me le faire savoir !
 ### 2025-01-03 00h13
 Pour utiliser Ollama sans installer de blobs ou pour trouver le chemin correct vers les fichiers de modèle, vous pouvez suivre ces étapes :
 
