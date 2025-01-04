@@ -6,8 +6,10 @@ import torch
 df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
 
 # Initialiser le modèle LLaMA et le tokenizer à partir des fichiers locaux
-model_path = "C:/Users/steve/.ollama/models/llama3"  # Remplacez par le chemin correct vers le modèle LLaMA sur votre ordinateur
-tokenizer = AutoTokenizer.from_pretrained(model_path)
+model_path = "C:/Users/steve/.ollama/models/llama3"  # Remplacez par le chemin correct vers le répertoire contenant les fichiers du modèle
+tokenizer_path = "C:/Users/steve/.ollama/models/llama3"  # Chemin vers le répertoire contenant le tokenizer
+
+tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
 model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16)
 
 # Fonction pour générer du texte avec LLaMA en français
@@ -26,7 +28,7 @@ for index, row in df.iterrows():
     
     df.at[index, 'Définition du type'] = generate_text(f"Définition du type {type_query} en français:")
     df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type {subtype_query} en français:")
-    df.at[index, 'Note explicative sur l'exemple'] = generate_text(f"Note explicative sur l'exemple {example_query} en français:")
+    df.at[index, 'Note explicative sur l\'exemple'] = generate_text(f"Note explicative sur l'exemple {example_query} en français:")
 
 # Sauvegarder le fichier Excel mis à jour
 df.to_excel('updated_table_with_definitions.xlsx', index=False)
