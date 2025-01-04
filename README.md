@@ -1,3 +1,82 @@
+### 2025-01-03 00h13
+Pour utiliser Ollama sans installer de blobs ou pour trouver le chemin correct vers les fichiers de modèle, vous pouvez suivre ces étapes :
+
+### Étapes pour trouver le chemin correct ou éviter l'installation de blobs
+
+1. **Vérifiez l'emplacement par défaut des modèles Ollama** :
+   Par défaut, Ollama installe les modèles dans un répertoire spécifique. Vous pouvez vérifier cet emplacement en consultant la documentation d'Ollama ou en utilisant les commandes suivantes pour trouver où les modèles sont installés.
+
+2. **Utilisez la commande `ollama list`** :
+   Cette commande vous permet de lister tous les modèles installés et leurs emplacements. Ouvrez votre terminal ou invite de commandes et exécutez :
+   ```bash
+   ollama list
+   ```
+
+3. **Configurer Ollama pour éviter les blobs** :
+   Si vous souhaitez éviter l'installation de blobs, vous pouvez configurer Ollama pour télécharger et installer les fichiers de modèle directement. Voici comment procéder :
+
+   - **Téléchargez et installez Ollama** :
+     ```bash
+     curl -fsSL https://ollama.com/install.sh | sh
+     ```
+
+   - **Téléchargez le modèle LLaMA 3** :
+     Utilisez la commande suivante pour télécharger le modèle LLaMA 3 sans blobs :
+     ```bash
+     ollama pull llama3-8b  # Remplacez par la version du modèle que vous souhaitez
+     ```
+
+4. **Vérifiez le répertoire des modèles** :
+   Une fois le modèle téléchargé, vous pouvez vérifier le répertoire où il est installé. Par défaut, cela pourrait être quelque chose comme `C:\Users\steve\.ollama\models\llama3`.
+
+### Exemple de script adapté
+
+Voici un exemple de script Python pour utiliser le modèle LLaMA 3 installé localement sans blobs :
+
+```python
+import pandas as pd
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+# Charger le fichier Excel
+df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
+
+# Initialiser le modèle LLaMA et le tokenizer à partir des fichiers locaux
+model_path = "C:/Users/steve/.ollama/models/llama3"  # Remplacez par le chemin correct vers le répertoire contenant les fichiers du modèle
+tokenizer_path = "C:/Users/steve/.ollama/models/llama3"  # Chemin vers le répertoire contenant le tokenizer
+
+tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16)
+
+# Fonction pour générer du texte avec LLaMA en français
+def generate_text(prompt):
+    inputs = tokenizer.encode(prompt, return_tensors="pt")
+    attention_mask = torch.ones(inputs.shape, dtype=torch.long)
+    outputs = model.generate(inputs, max_length=100, num_return_sequences=1, attention_mask=attention_mask, pad_token_id=tokenizer.eos_token_id)
+    text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return text
+
+# Parcourir les lignes du DataFrame et remplir les colonnes
+for index, row in df.iterrows():
+    type_query = row['Type']
+    subtype_query = row['Sous-Type']
+    example_query = row['Exemple']
+    
+    df.at[index, 'Définition du type'] = generate_text(f"Définition du type {type_query} en français:")
+    df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type {subtype_query} en français:")
+    df.at[index, 'Note explicative sur l\'exemple'] = generate_text(f"Note explicative sur l'exemple {example_query} en français:")
+
+# Sauvegarder le fichier Excel mis à jour
+df.to_excel('updated_table_with_definitions.xlsx', index=False)
+
+print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
+```
+
+### Remarques :
+- **Chemin correct** : Assurez-vous que le chemin spécifié (`C:/Users/steve/.ollama/models/llama3`) pointe vers le répertoire contenant les fichiers du modèle et du tokenizer de LLaMA.
+- **Configuration d'Ollama** : Utilisez les commandes `ollama list` et `ollama pull` pour gérer les modèles installés et éviter les blobs.
+
+Si vous avez des questions supplémentaires ou avez besoin d'aide pour ajuster le script, n'hésitez pas à me le faire savoir !
 ### 2025-01-03 00h11
 L'erreur que vous rencontrez indique que le chemin fourni n'est pas reconnu comme un chemin valide pour un modèle ou un tokenizer. Pour résoudre ce problème, vous devez vous assurer que le chemin pointe vers un répertoire contenant les fichiers nécessaires pour le modèle et le tokenizer, et non directement vers un fichier blob.
 
