@@ -6,7 +6,7 @@ import torch
 df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
 
 # Initialiser le modèle LLaMA et le tokenizer à partir des fichiers locaux
-model_path = "D:/chemin/vers/votre/modele/llama"  # Remplacez par le chemin correct vers le modèle LLaMA sur votre ordinateur
+model_path = "D:/models/llama3"  # Remplacez par le chemin correct vers le modèle LLaMA sur votre ordinateur
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16)
 
