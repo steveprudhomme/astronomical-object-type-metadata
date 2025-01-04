@@ -1,40 +1,16 @@
-import tarfile
-import os
-
-blob_path = "C:/Users/steve/.ollama/models/blobs/sha256-<votre_hash>"  # Remplacez par le chemin correct vers le fichier blob
-extract_path = "C:/Users/steve/.ollama/models/llama3"  # Chemin où vous souhaitez extraire les fichiers
-
-# Assurez-vous que le répertoire de destination existe
-os.makedirs(extract_path, exist_ok=True)
-
-# Extraire les fichiers du blob
-with tarfile.open(blob_path, "r:*") as tar:
-    tar.extractall(path=extract_path)
-
-print(f"Les fichiers ont été extraits dans {extract_path}")
-Utiliser les fichiers extraits dans votre script : Une fois les fichiers extraits, vous pouvez les utiliser dans votre script Python avec transformers. Voici comment adapter votre script :
-
+import requests
 import pandas as pd
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
 
 # Charger le fichier Excel
 df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
 
-# Initialiser le modèle LLaMA et le tokenizer à partir des fichiers locaux
-model_path = "C:/Users/steve/.ollama/models/llama3"  # Chemin vers le répertoire contenant les fichiers extraits
-tokenizer_path = "C:/Users/steve/.ollama/models/llama3"  # Chemin vers le répertoire contenant le tokenizer
-
-tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
-model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16)
-
-# Fonction pour générer du texte avec LLaMA en français
+# Fonction pour générer du texte avec l'API locale d'Ollama
 def generate_text(prompt):
-    inputs = tokenizer.encode(prompt, return_tensors="pt")
-    attention_mask = torch.ones(inputs.shape, dtype=torch.long)
-    outputs = model.generate(inputs, max_length=100, num_return_sequences=1, attention_mask=attention_mask, pad_token_id=tokenizer.eos_token_id)
-    text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    return text
+    response = requests.post(
+        "http://localhost:11434/api/generate",  # Assurez-vous que l'API locale est accessible à cette adresse
+        json={"model": "llama3-70b", "prompt": prompt}
+    )
+    return response.json()["text"]
 
 # Parcourir les lignes du DataFrame et remplir les colonnes
 for index, row in df.iterrows():

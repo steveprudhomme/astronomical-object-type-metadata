@@ -1,7 +1,72 @@
+### 2025-01-03 00h21
+Il semble que le fichier blob que vous avez ne soit pas un fichier d'archive standard comme gzip, bzip2, xz ou tar. Cela signifie que nous devons trouver une autre méthode pour extraire ou utiliser ce fichier.
+
+#### Étapes pour résoudre le problème
+
+1. **Vérifiez le fichier blob** :
+   Assurez-vous que le fichier blob est bien le modèle que vous souhaitez utiliser. Vous pouvez essayer de vérifier son contenu avec un éditeur hexadécimal ou un outil similaire pour confirmer qu'il s'agit bien d'un fichier de modèle.
+
+2. **Utilisez Ollama pour gérer le modèle** :
+   Ollama est conçu pour gérer les modèles de manière transparente. Vous pouvez utiliser Ollama pour servir le modèle et interagir avec lui via une API locale.
+
+#### Utilisation d'Ollama pour servir le modèle
+
+1. **Installer Ollama** :
+   Si ce n'est pas déjà fait, installez Ollama en suivant les instructions sur leur site officiel :
+   ```bash
+   curl -fsSL https://ollama.com/install.sh | sh
+   ```
+
+2. **Télécharger et servir le modèle** :
+   Utilisez Ollama pour télécharger et servir le modèle. Par exemple, pour télécharger et servir LLaMA 3, vous pouvez utiliser les commandes suivantes :
+   ```bash
+   ollama pull llama3-70b  # Remplacez par la version du modèle que vous souhaitez
+   ollama serve llama3-70b
+   ```
+
+3. **Interagir avec le modèle via l'API locale** :
+   Une fois le modèle servi, vous pouvez interagir avec lui via une API locale. Voici un exemple de script Python pour interagir avec le modèle via l'API locale :
+
+   ```python
+   import requests
+   import pandas as pd
+
+   # Charger le fichier Excel
+   df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
+
+   # Fonction pour générer du texte avec l'API locale d'Ollama
+   def generate_text(prompt):
+       response = requests.post(
+           "http://localhost:11434/api/generate",  # Assurez-vous que l'API locale est accessible à cette adresse
+           json={"model": "llama3-70b", "prompt": prompt}
+       )
+       return response.json()["text"]
+
+   # Parcourir les lignes du DataFrame et remplir les colonnes
+   for index, row in df.iterrows():
+       type_query = row['Type']
+       subtype_query = row['Sous-Type']
+       example_query = row['Exemple']
+       
+       df.at[index, 'Définition du type'] = generate_text(f"Définition du type {type_query} en français:")
+       df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type {subtype_query} en français:")
+       df.at[index, 'Note explicative sur l'exemple'] = generate_text(f"Note explicative sur l'exemple {example_query} en français:")
+
+   # Sauvegarder le fichier Excel mis à jour
+   df.to_excel('updated_table_with_definitions.xlsx', index=False)
+
+   print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
+   ```
+
+#### Remarques :
+- **API locale** : Assurez-vous que l'API locale d'Ollama est accessible à l'adresse spécifiée (`http://localhost:11434/api/generate`).
+- **Configuration d'Ollama** : Utilisez les commandes `ollama pull` et `ollama serve` pour gérer et servir les modèles.
+
+Si vous avez des questions supplémentaires ou avez besoin d'aide pour ajuster le script, n'hésitez pas à me le faire savoir !
 ### 2025-01-03 00h15
 Il semble que Ollama installe les modèles sous forme de blobs, ce qui peut compliquer l'utilisation directe des fichiers de modèle avec des bibliothèques comme `transformers`. Voici quelques étapes pour gérer cette situation et extraire les fichiers nécessaires :
 
-### Étapes pour extraire les fichiers de modèle à partir d'un blob
+#### Étapes pour extraire les fichiers de modèle à partir d'un blob
 
 1. **Identifier le fichier blob** :
    Vous avez mentionné que le fichier blob est situé dans `C:\Users\steve\.ollama\models\blobs` et qu'il a un nom de type SHA-256. Assurez-vous que ce fichier est bien le modèle que vous souhaitez utiliser.
@@ -68,7 +133,7 @@ Il semble que Ollama installe les modèles sous forme de blobs, ce qui peut comp
    print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
    ```
 
-### Remarques :
+#### Remarques :
 - **Chemin correct** : Assurez-vous que le chemin spécifié (`C:/Users/steve/.ollama/models/llama3`) pointe vers le répertoire contenant les fichiers extraits du modèle et du tokenizer de LLaMA.
 - **Extraction des fichiers** : Utilisez le script Python ou un autre outil pour extraire les fichiers nécessaires à partir du blob.
 
@@ -76,7 +141,7 @@ Si vous avez des questions supplémentaires ou avez besoin d'aide pour ajuster l
 ### 2025-01-03 00h13
 Pour utiliser Ollama sans installer de blobs ou pour trouver le chemin correct vers les fichiers de modèle, vous pouvez suivre ces étapes :
 
-### Étapes pour trouver le chemin correct ou éviter l'installation de blobs
+#### Étapes pour trouver le chemin correct ou éviter l'installation de blobs
 
 1. **Vérifiez l'emplacement par défaut des modèles Ollama** :
    Par défaut, Ollama installe les modèles dans un répertoire spécifique. Vous pouvez vérifier cet emplacement en consultant la documentation d'Ollama ou en utilisant les commandes suivantes pour trouver où les modèles sont installés.
@@ -104,7 +169,7 @@ Pour utiliser Ollama sans installer de blobs ou pour trouver le chemin correct v
 4. **Vérifiez le répertoire des modèles** :
    Une fois le modèle téléchargé, vous pouvez vérifier le répertoire où il est installé. Par défaut, cela pourrait être quelque chose comme `C:\Users\steve\.ollama\models\llama3`.
 
-### Exemple de script adapté
+#### Exemple de script adapté
 
 Voici un exemple de script Python pour utiliser le modèle LLaMA 3 installé localement sans blobs :
 
@@ -147,7 +212,7 @@ df.to_excel('updated_table_with_definitions.xlsx', index=False)
 print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
 ```
 
-### Remarques :
+#### Remarques :
 - **Chemin correct** : Assurez-vous que le chemin spécifié (`C:/Users/steve/.ollama/models/llama3`) pointe vers le répertoire contenant les fichiers du modèle et du tokenizer de LLaMA.
 - **Configuration d'Ollama** : Utilisez les commandes `ollama list` et `ollama pull` pour gérer les modèles installés et éviter les blobs.
 
