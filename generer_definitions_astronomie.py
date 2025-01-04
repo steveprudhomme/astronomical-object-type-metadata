@@ -10,7 +10,16 @@ def generate_text(prompt):
         "http://localhost:11434/api/generate",  # Assurez-vous que l'API locale est accessible à cette adresse
         json={"model": "llama3.3:70b-instruct-q2_K", "prompt": prompt}
     )
-    return response.json()["text"]
+    
+    # Débogage : Afficher la réponse brute
+    print("Réponse brute de l'API:", response.text)
+    
+    # Tenter de décoder la réponse en JSON
+    try:
+        return response.json()["text"]
+    except requests.exceptions.JSONDecodeError as e:
+        print("Erreur de décodage JSON:", e)
+        return "Erreur de génération de texte"
 
 # Parcourir les lignes du DataFrame et remplir les colonnes
 for index, row in df.iterrows():
@@ -20,7 +29,7 @@ for index, row in df.iterrows():
     
     df.at[index, 'Définition du type'] = generate_text(f"Définition du type d'objet astronomique {type_query} en français:")
     df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type d'objet astronomique {subtype_query} de type {type_query} en français:")
-    df.at[index, 'Note explicative sur l\'exemple'] = generate_text(f"Note explicative sur l'exemple de sous-type d'objets astronomiques {example_query} en français:")
+    df.at[index, 'Note explicative sur l'exemple'] = generate_text(f"Note explicative sur l'exemple de sous-type d'objets astronomiques {example_query} en français:")
 
 # Sauvegarder le fichier Excel mis à jour
 df.to_excel('updated_table_with_definitions.xlsx', index=False)

@@ -1,3 +1,60 @@
+### 2025-01-03 00h33
+L'erreur `JSONDecodeError: Extra data` indique que la réponse de l'API contient des données supplémentaires ou mal formées qui ne peuvent pas être décodées en JSON. Cela peut se produire si l'API renvoie une réponse qui n'est pas strictement au format JSON attendu.
+
+Pour diagnostiquer et corriger ce problème, nous pouvons ajouter quelques étapes de débogage pour inspecter la réponse brute de l'API avant d'essayer de la décoder en JSON. Voici comment vous pouvez modifier le script pour inclure ces étapes :
+
+#### Script mis à jour avec débogage
+
+```python
+import pandas as pd
+import requests
+
+# Charger le fichier Excel
+df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
+
+# Fonction pour générer du texte avec l'API locale d'Ollama
+def generate_text(prompt):
+    response = requests.post(
+        "http://localhost:11434/api/generate",  # Assurez-vous que l'API locale est accessible à cette adresse
+        json={"model": "llama3.3:70b-instruct-q2_K", "prompt": prompt}
+    )
+    
+    # Débogage : Afficher la réponse brute
+    print("Réponse brute de l'API:", response.text)
+    
+    # Tenter de décoder la réponse en JSON
+    try:
+        return response.json()["text"]
+    except requests.exceptions.JSONDecodeError as e:
+        print("Erreur de décodage JSON:", e)
+        return "Erreur de génération de texte"
+
+# Parcourir les lignes du DataFrame et remplir les colonnes
+for index, row in df.iterrows():
+    type_query = row['Type']
+    subtype_query = row['Sous-Type']
+    example_query = row['Exemple']
+    
+    df.at[index, 'Définition du type'] = generate_text(f"Définition du type d'objet astronomique {type_query} en français:")
+    df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type d'objet astronomique {subtype_query} de type {type_query} en français:")
+    df.at[index, 'Note explicative sur l'exemple'] = generate_text(f"Note explicative sur l'exemple de sous-type d'objets astronomiques {example_query} en français:")
+
+# Sauvegarder le fichier Excel mis à jour
+df.to_excel('updated_table_with_definitions.xlsx', index=False)
+
+print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
+```
+
+#### Explications des modifications :
+- **Débogage de la réponse brute** : Ajout d'une ligne pour afficher la réponse brute de l'API (`response.text`). Cela permet de voir exactement ce que l'API renvoie.
+- **Gestion des erreurs de décodage JSON** : Ajout d'un bloc `try-except` pour gérer les erreurs de décodage JSON et afficher un message d'erreur approprié.
+
+#### Étapes suivantes :
+1. **Exécutez le script** : Exécutez le script mis à jour pour voir la réponse brute de l'API dans la console.
+2. **Inspectez la réponse** : Vérifiez si la réponse brute contient des données supplémentaires ou mal formées.
+3. **Ajustez le traitement de la réponse** : En fonction de ce que vous voyez dans la réponse brute, vous pouvez ajuster le traitement de la réponse pour extraire correctement le texte généré.
+
+Si vous avez des questions supplémentaires ou avez besoin d'aide pour ajuster le script, n'hésitez pas à me le faire savoir !
 ### 2025-01-03 00h32
 D'accord, je vais ajouter le type avant le sous-type dans la définition. Voici le script mis à jour :
 
