@@ -1,3 +1,91 @@
+### 2025-01-03 00h43
+Il semble que l'API locale d'Ollama renvoie des réponses fragmentées, ce qui cause l'erreur de décodage JSON. Voici quelques suggestions pour résoudre ce problème :
+
+1. **Assembler les réponses fragmentées** : Vous pouvez modifier la fonction `generate_text` pour assembler les réponses fragmentées avant de tenter de les décoder en JSON. Voici un exemple de comment vous pourriez le faire :
+    ```python
+    def generate_text(prompt):
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={"model": "llama3.3:70b-instruct-q2_K", "prompt": prompt}
+        )
+        
+        # Débogage : Afficher la réponse brute
+        print("Réponse brute de l'API:", response.text)
+        
+        # Assembler les réponses fragmentées
+        full_response = ""
+        for line in response.text.splitlines():
+            try:
+                json_line = json.loads(line)
+                full_response += json_line["response"]
+                if json_line.get("done", False):
+                    break
+            except json.JSONDecodeError as e:
+                print("Erreur de décodage JSON:", e)
+                return "Erreur de génération de texte"
+        
+        return full_response
+    ```
+
+2. **Gestion des types de données dans Pandas** : Pour éviter l'avertissement `FutureWarning` de Pandas, vous pouvez explicitement convertir les valeurs en chaîne de caractères avant de les assigner :
+    ```python
+    df.at[index, 'Définition du type'] = str(generate_text(f"Définition du type d'objet astronomique {type_query} en français:"))
+    df.at[index, 'Définition du sous-type'] = str(generate_text(f"Définition du sous-type d'objet astronomique {subtype_query} de type {type_query} en français:"))
+    df.at[index, 'Note explicative sur l\'exemple'] = str(generate_text(f"Note explicative sur l'exemple d'objet astronomique {type_query}, {subtype_query}, {example_query} en français:"))
+    ```
+
+Essayez ces modifications et voyez si elles résolvent les problèmes que vous rencontrez. Si vous avez d'autres questions ou si vous avez besoin de plus d'aide, n'hésitez pas à demander ! 😊
+Bien sûr ! Voici le script complet avec les corrections apportées pour gérer les réponses fragmentées de l'API et éviter l'avertissement de Pandas :
+
+```python
+import pandas as pd
+import requests
+import json
+
+# Charger le fichier Excel
+df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
+
+# Fonction pour générer du texte avec l'API locale d'Ollama
+def generate_text(prompt):
+    response = requests.post(
+        "http://localhost:11434/api/generate",  # Assurez-vous que l'API locale est accessible à cette adresse
+        json={"model": "llama3.3:70b-instruct-q2_K", "prompt": prompt}
+    )
+    
+    # Débogage : Afficher la réponse brute
+    print("Réponse brute de l'API:", response.text)
+    
+    # Assembler les réponses fragmentées
+    full_response = ""
+    for line in response.text.splitlines():
+        try:
+            json_line = json.loads(line)
+            full_response += json_line["response"]
+            if json_line.get("done", False):
+                break
+        except json.JSONDecodeError as e:
+            print("Erreur de décodage JSON:", e)
+            return "Erreur de génération de texte"
+    
+    return full_response
+
+# Parcourir les lignes du DataFrame et remplir les colonnes
+for index, row in df.iterrows():
+    type_query = row['Type']
+    subtype_query = row['Sous-Type']
+    example_query = row['Exemple']
+    
+    df.at[index, 'Définition du type'] = str(generate_text(f"Définition du type d'objet astronomique {type_query} en français:"))
+    df.at[index, 'Définition du sous-type'] = str(generate_text(f"Définition du sous-type d'objet astronomique {subtype_query} de type {type_query} en français:"))
+    df.at[index, 'Note explicative sur l\'exemple'] = str(generate_text(f"Note explicative sur l'exemple d'objet astronomique {type_query}, {subtype_query}, {example_query} en français:"))
+
+# Sauvegarder le fichier Excel mis à jour
+df.to_excel('updated_table_with_definitions.xlsx', index=False)
+
+print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
+```
+
+Essayez ce script et voyez si cela résout les problèmes que vous rencontriez. Si vous avez d'autres questions ou besoin d'aide supplémentaire, je suis là pour vous aider ! 😊
 ### 2025-01-03 00h37
 Il semble que l'erreur soit due à l'utilisation de guillemets simples à l'intérieur de la chaîne de caractères. Pour corriger cela, vous pouvez utiliser des guillemets doubles pour la chaîne de caractères principale ou échapper les guillemets simples à l'intérieur de la chaîne.
 
