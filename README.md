@@ -1,3 +1,61 @@
+### 2025-01-02 23h02
+Il semble que le modèle LLaMA 3 de Meta ne soit pas disponible ou nécessite une authentification pour y accéder. Nous pouvons utiliser un autre modèle open source performant et accessible, comme **GPT-NeoX** d'EleutherAI, qui est connu pour ses capacités avancées.
+
+### Instructions pour installer les bibliothèques nécessaires :
+1. **Installer les bibliothèques nécessaires** :
+   ```bash
+   pip install pandas transformers torch openpyxl
+   ```
+
+2. **Télécharger et configurer GPT-NeoX** :
+   - GPT-NeoX est disponible sur Hugging Face. Vous pouvez utiliser le modèle `EleutherAI/gpt-neox-20b`.
+
+### Script Python adapté pour utiliser GPT-NeoX :
+```python
+import pandas as pd
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+# Charger le fichier Excel
+df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
+
+# Initialiser le modèle GPT-NeoX et le tokenizer
+model_name = "EleutherAI/gpt-neox-20b"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
+
+# Fonction pour générer du texte avec GPT-NeoX en français
+def generate_text(prompt):
+    inputs = tokenizer.encode(prompt, return_tensors="pt")
+    attention_mask = torch.ones(inputs.shape, dtype=torch.long)
+    outputs = model.generate(inputs, max_length=100, num_return_sequences=1, attention_mask=attention_mask, pad_token_id=tokenizer.eos_token_id)
+    text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return text
+
+# Parcourir les lignes du DataFrame et remplir les colonnes
+for index, row in df.iterrows():
+    type_query = row['Type']
+    subtype_query = row['Sous-Type']
+    example_query = row['Exemple']
+    
+    df.at[index, 'Définition du type'] = generate_text(f"Définition du type {type_query} en français:")
+    df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type {subtype_query} en français:")
+    df.at[index, 'Note explicative sur l\'exemple'] = generate_text(f"Note explicative sur l'exemple {example_query} en français:")
+
+# Sauvegarder le fichier Excel mis à jour
+df.to_excel('updated_table_with_definitions.xlsx', index=False)
+
+print("Le fichier Excel a été mis à jour avec des définitions générées par GPT-NeoX en français.")
+```
+
+### Explications des modifications :
+- **Initialisation de GPT-NeoX** : Utilisation de `AutoModelForCausalLM` et `AutoTokenizer` de la bibliothèque `transformers` pour charger le modèle GPT-NeoX.
+- **Fonction `generate_text`** : Cette fonction génère du texte en utilisant GPT-NeoX basé sur un prompt donné.
+- **Boucle sur les lignes du DataFrame** : Pour chaque ligne, le script utilise GPT-NeoX pour générer les définitions des types, sous-types et exemples, puis les insère dans les colonnes appropriées.
+- **Sauvegarde du fichier Excel mis à jour** : Le fichier Excel est sauvegardé avec les nouvelles informations générées par GPT-NeoX.
+
+Ce script devrait vous permettre de générer les définitions et notes explicatives directement à l'aide de GPT-NeoX en mode local et en français. Si vous avez des questions ou des ajustements à faire, n'hésitez pas à me le faire savoir !
+### 2025-01-02 22h59
 1. **Installer les bibliothèques nécessaires** :
    ```bash
    pip install pandas transformers torch openpyxl
