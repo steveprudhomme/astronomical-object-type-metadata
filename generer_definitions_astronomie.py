@@ -7,6 +7,11 @@ print("Chargement du fichier Excel...")
 df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
 print("Fichier Excel chargé avec succès.")
 
+# Dictionnaires pour stocker les définitions déjà générées
+definitions_type = {}
+definitions_subtype = {}
+definitions_example = {}
+
 # Fonction pour générer du texte avec l'API locale d'Ollama
 def generate_text(prompt):
     print(f"Envoi de la requête à l'API pour le prompt : {prompt}")
@@ -41,17 +46,37 @@ for index, row in df.iterrows():
     subtype_query = row['Sous-Type']
     example_query = row['Exemple']
     
-    df.at[index, 'Définition du type'] = str(generate_text(f"Définition du type d'objet astronomique {type_query} en français:"))
+    # Vérifier si la définition du type a déjà été générée
+    if type_query in definitions_type:
+        df.at[index, 'Définition du type'] = definitions_type[type_query]
+    else:
+        definition_type = generate_text(f"Définition du type d'objet astronomique {type_query} en français:")
+        definitions_type[type_query] = definition_type
+        df.at[index, 'Définition du type'] = definition_type
     
     # Sauvegarder le fichier Excel mis à jour après chaque définition
     df.to_excel(f'updated_table_with_definitions_{index + 1}_type.xlsx', index=False)
     
-    df.at[index, 'Définition du sous-type'] = str(generate_text(f"Définition du sous-type d'objet astronomique {subtype_query} de type {type_query} en français:"))
+    # Vérifier si la définition du sous-type a déjà été générée
+    subtype_key = (type_query, subtype_query)
+    if subtype_key in definitions_subtype:
+        df.at[index, 'Définition du sous-type'] = definitions_subtype[subtype_key]
+    else:
+        definition_subtype = generate_text(f"Définition du sous-type d'objet astronomique {subtype_query} de type {type_query} en français:")
+        definitions_subtype[subtype_key] = definition_subtype
+        df.at[index, 'Définition du sous-type'] = definition_subtype
     
     # Sauvegarder le fichier Excel mis à jour après chaque définition
     df.to_excel(f'updated_table_with_definitions_{index + 1}_subtype.xlsx', index=False)
     
-    df.at[index, 'Note explicative sur l\'exemple'] = str(generate_text(f"Note explicative sur l'exemple d'objet astronomique {type_query}, {subtype_query}, {example_query} en français:"))
+    # Vérifier si la note explicative sur l'exemple a déjà été générée
+    example_key = (type_query, subtype_query, example_query)
+    if example_key in definitions_example:
+        df.at[index, 'Note explicative sur l\'exemple'] = definitions_example[example_key]
+    else:
+        definition_example = generate_text(f"Note explicative sur l'exemple d'objet astronomique {type_query}, {subtype_query}, {example_query} en français:")
+        definitions_example[example_key] = definition_example
+        df.at[index, 'Note explicative sur l\'exemple'] = definition_example
     
     # Sauvegarder le fichier Excel mis à jour après chaque définition
     df.to_excel(f'updated_table_with_definitions_{index + 1}_example.xlsx', index=False)
