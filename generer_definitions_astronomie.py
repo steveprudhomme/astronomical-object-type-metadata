@@ -1,5 +1,5 @@
-import requests
 import pandas as pd
+import requests
 
 # Charger le fichier Excel
 df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
@@ -20,7 +20,7 @@ for index, row in df.iterrows():
     
     df.at[index, 'Définition du type'] = generate_text(f"Définition du type {type_query} en français:")
     df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type {subtype_query} en français:")
-    df.at[index, 'Note explicative sur l'exemple'] = generate_text(f"Note explicative sur l'exemple {example_query} en français:")
+    df.at[index, 'Note explicative sur l\'exemple'] = generate_text(f"Note explicative sur l'exemple de sous-type d'objets astronomiques {example_query} en français:")
 
 # Sauvegarder le fichier Excel mis à jour
 df.to_excel('updated_table_with_definitions.xlsx', index=False)
