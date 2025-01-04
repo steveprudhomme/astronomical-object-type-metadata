@@ -5,12 +5,12 @@ import torch
 # Charger le fichier Excel
 df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
 
-# Initialiser le modèle LLaMA 3 et le tokenizer
-model_name = "meta-llama/Meta-Llama-3-8B-Instruct"  # Remplacez par le chemin correct vers le modèle LLaMA 3
-tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=True)
-model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16, use_auth_token=True)
+# Initialiser le modèle LLaMA et le tokenizer à partir des fichiers locaux
+model_path = "/chemin/vers/votre/modele/llama"  # Remplacez par le chemin correct vers le modèle LLaMA sur votre ordinateur
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16)
 
-# Fonction pour générer du texte avec LLaMA 3 en français
+# Fonction pour générer du texte avec LLaMA en français
 def generate_text(prompt):
     inputs = tokenizer.encode(prompt, return_tensors="pt")
     attention_mask = torch.ones(inputs.shape, dtype=torch.long)
@@ -31,4 +31,4 @@ for index, row in df.iterrows():
 # Sauvegarder le fichier Excel mis à jour
 df.to_excel('updated_table_with_definitions.xlsx', index=False)
 
-print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA 3 en français.")
+print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")

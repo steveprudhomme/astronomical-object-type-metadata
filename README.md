@@ -1,3 +1,54 @@
+### 2025-01-02 23h04
+Oui, si vous avez déjà installé LLaMA sur votre ordinateur, vous pouvez l'utiliser avec ce script. Vous devrez simplement ajuster le chemin vers le modèle et le tokenizer pour qu'ils pointent vers les fichiers locaux sur votre machine. Voici comment vous pouvez adapter le script pour utiliser les fichiers locaux de LLaMA :
+
+### Script Python adapté pour utiliser LLaMA installé localement
+
+```python
+import pandas as pd
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+# Charger le fichier Excel
+df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
+
+# Initialiser le modèle LLaMA et le tokenizer à partir des fichiers locaux
+model_path = "/chemin/vers/votre/modele/llama"  # Remplacez par le chemin correct vers le modèle LLaMA sur votre ordinateur
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16)
+
+# Fonction pour générer du texte avec LLaMA en français
+def generate_text(prompt):
+    inputs = tokenizer.encode(prompt, return_tensors="pt")
+    attention_mask = torch.ones(inputs.shape, dtype=torch.long)
+    outputs = model.generate(inputs, max_length=100, num_return_sequences=1, attention_mask=attention_mask, pad_token_id=tokenizer.eos_token_id)
+    text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return text
+
+# Parcourir les lignes du DataFrame et remplir les colonnes
+for index, row in df.iterrows():
+    type_query = row['Type']
+    subtype_query = row['Sous-Type']
+    example_query = row['Exemple']
+    
+    df.at[index, 'Définition du type'] = generate_text(f"Définition du type {type_query} en français:")
+    df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type {subtype_query} en français:")
+    df.at[index, 'Note explicative sur l\'exemple'] = generate_text(f"Note explicative sur l'exemple {example_query} en français:")
+
+# Sauvegarder le fichier Excel mis à jour
+df.to_excel('updated_table_with_definitions.xlsx', index=False)
+
+print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
+```
+
+### Explications des modifications :
+- **Chemin vers le modèle** : Remplacez `/chemin/vers/votre/modele/llama` par le chemin correct vers le modèle LLaMA sur votre ordinateur.
+- **Initialisation locale** : Utilisation de `AutoTokenizer.from_pretrained` et `AutoModelForCausalLM.from_pretrained` avec le chemin local pour initialiser le tokenizer et le modèle.
+
+### Remarques :
+- **Chemin correct** : Assurez-vous que le chemin spécifié pointe vers le répertoire contenant les fichiers du modèle et du tokenizer de LLaMA.
+- **Configuration du modèle** : Adaptez les paramètres de génération (`max_length`, `num_return_sequences`, etc.) en fonction de vos besoins spécifiques.
+
+Ce script devrait maintenant fonctionner avec votre installation locale de LLaMA et générer des définitions en français pour les types, sous-types et exemples dans votre fichier Excel. Si vous avez des questions supplémentaires ou avez besoin d'aide pour ajuster le script, n'hésitez pas à me le faire savoir !
 ### 2025-01-02 23h03
 Pour utiliser le modèle LLaMA 3 de Meta en local, vous devez suivre plusieurs étapes pour télécharger et configurer les fichiers de modèle et le tokenizer. Voici un guide détaillé pour vous aider à préparer ces fichiers :
 
