@@ -1,3 +1,41 @@
+### 2025-01-03 00h32
+D'accord, je vais ajouter le type avant le sous-type dans la définition. Voici le script mis à jour :
+
+```python
+import pandas as pd
+import requests
+
+# Charger le fichier Excel
+df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
+
+# Fonction pour générer du texte avec l'API locale d'Ollama
+def generate_text(prompt):
+    response = requests.post(
+        "http://localhost:11434/api/generate",  # Assurez-vous que l'API locale est accessible à cette adresse
+        json={"model": "llama3.3:70b-instruct-q2_K", "prompt": prompt}
+    )
+    return response.json()["text"]
+
+# Parcourir les lignes du DataFrame et remplir les colonnes
+for index, row in df.iterrows():
+    type_query = row['Type']
+    subtype_query = row['Sous-Type']
+    example_query = row['Exemple']
+    
+    df.at[index, 'Définition du type'] = generate_text(f"Définition du type d'objet astronomique {type_query} en français:")
+    df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type d'objet astronomique {subtype_query} de type {type_query} en français:")
+    df.at[index, 'Note explicative sur l\'exemple'] = generate_text(f"Note explicative sur l'exemple de sous-type d'objets astronomiques {example_query} en français:")
+
+# Sauvegarder le fichier Excel mis à jour
+df.to_excel('updated_table_with_definitions.xlsx', index=False)
+
+print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
+```
+
+#### Explications des modifications :
+- **Ajout du type avant le sous-type** : J'ai modifié la ligne pour inclure le type avant le sous-type dans la définition. Par exemple, pour un astéroïde de type 1, la chaîne de caractères sera "Définition du sous-type d'objet astronomique [Sous-Type] de type [Type] en français:".
+
+Ce script devrait maintenant fonctionner correctement et générer des définitions en français pour les types, sous-types et exemples dans votre fichier Excel, avec le type ajouté avant le sous-type. Si vous rencontrez d'autres problèmes ou avez besoin d'ajustements supplémentaires, n'hésitez pas à me le faire savoir !
 ### 2025-01-03 00h30
 D'accord, je vais ajouter la précision "du type d'objet astronomique" à la chaîne de caractères. Voici le script mis à jour :
 
