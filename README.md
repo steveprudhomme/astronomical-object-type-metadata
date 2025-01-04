@@ -1,3 +1,146 @@
+# Génération de Définitions Astronomiques avec LLaMA
+
+## Description
+
+Ce script Python utilise l'API locale d'Ollama pour générer des définitions et des notes explicatives sur des objets astronomiques à partir d'un fichier Excel. Le script parcourt chaque ligne du fichier Excel, envoie des requêtes à l'API pour obtenir des définitions en français, et sauvegarde les résultats dans un nouveau fichier Excel. Si un type ou un sous-type d'objet a déjà été traité, le script réutilise la définition précédemment générée pour éviter des appels redondants à l'API.
+
+## Origine du Fichier Excel
+
+Le fichier Excel utilisé dans ce script provient du **Catalogue Exotica** de Breakthrough Listen, un projet de recherche de l'Université de Californie à Berkeley. Le Catalogue Exotica est une collection de plus de 700 objets célestes distincts, visant à inclure "un de chaque" type d'objet astronomique connu. Il comprend des exemples de chaque type dans l'échantillon Prototype, des objets extrêmes avec des propriétés record dans l'échantillon Superlative, et des cibles énigmatiques dans l'échantillon Anomaly[1](https://owl.purdue.edu/owl/research_and_citation/apa_style/apa_formatting_and_style_guide/index.html).
+
+Le fichier Excel a été extrait du code source de l'article scientifique "One of Everything: The Breakthrough Listen Exotica Catalog" disponible sur arXiv[2](https://www.scribbr.com/apa-style/format/). La conversion du tableau LaTeX en fichier Excel a été réalisée à l'aide du convertisseur en ligne disponible sur TableConvert[3](https://apastyle.apa.org/instructional-aids/reference-examples.pdf).
+
+## Fonctionnalités
+
+- Chargement d'un fichier Excel contenant des informations sur des objets astronomiques.
+- Génération de définitions et de notes explicatives en français à l'aide de l'API locale d'Ollama.
+- Sauvegarde des résultats dans un nouveau fichier Excel après chaque définition générée.
+- Réutilisation des définitions précédemment générées pour les types et sous-types déjà rencontrés.
+
+## Prérequis
+
+- Python 3.x
+- Bibliothèque `pandas`
+- Bibliothèque `requests`
+- API locale d'Ollama accessible à l'adresse `http://localhost:11434/api/generate`
+- Fichier Excel `updated_table.xlsx` avec les colonnes `Type`, `Sous-Type`, et `Exemple`
+
+## Installation des Prérequis
+
+1. **Installer Python 3.x** : Vous pouvez télécharger et installer Python à partir du site officiel python.org.
+
+2. **Installer les bibliothèques nécessaires** :
+    ```bash
+    pip install pandas requests openpyxl
+    ```
+
+3. **Configurer l'API locale d'Ollama** : Assurez-vous que l'API locale d'Ollama est accessible à l'adresse `http://localhost:11434/api/generate`.
+
+## Utilisation
+
+1. **Préparer le fichier Excel** : Assurez-vous que votre fichier Excel `updated_table.xlsx` contient les colonnes `Type`, `Sous-Type`, et `Exemple`.
+
+2. **Exécuter le script** :
+    ```bash
+    python generer_definitions_astronomie.py
+    ```
+
+3. **Vérifier les résultats** : Le script générera des fichiers Excel mis à jour après chaque définition générée, ainsi qu'un fichier final `updated_table_with_definitions_final.xlsx` contenant toutes les définitions.
+
+## Exemple de Script
+
+Voici un exemple de script complet :
+
+```python
+import pandas as pd
+import requests
+import json
+
+# Charger le fichier Excel
+print("Chargement du fichier Excel...")
+df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
+print("Fichier Excel chargé avec succès.")
+
+# Dictionnaires pour stocker les définitions déjà générées
+definitions_type = {}
+definitions_subtype = {}
+definitions_example = {}
+
+# Fonction pour générer du texte avec l'API locale d'Ollama
+def generate_text(prompt):
+    print(f"Envoi de la requête à l'API pour le prompt : {prompt}")
+    response = requests.post(
+        "http://localhost:11434/api/generate",  # Assurez-vous que l'API locale est accessible à cette adresse
+        json={"model": "llama3.3:70b-instruct-q2_K", "prompt": prompt}
+    )
+    
+    # Débogage : Afficher la réponse brute
+    print("Réponse brute de l'API:", response.text)
+    
+    # Assembler les réponses fragmentées
+    full_response = ""
+    for line in response.text.splitlines():
+        try:
+            json_line = json.loads(line)
+            full_response += json_line["response"]
+            if json_line.get("done", False):
+                break
+        except json.JSONDecodeError as e:
+            print("Erreur de décodage JSON:", e)
+            return "Erreur de génération de texte"
+    
+    print(f"Réponse complète de l'API : {full_response}")
+    return full_response
+
+# Parcourir les lignes du DataFrame et remplir les colonnes
+print("Début du traitement des lignes du DataFrame...")
+for index, row in df.iterrows():
+    print(f"Traitement de la ligne {index + 1}/{len(df)}")
+    type_query = row['Type']
+    subtype_query = row['Sous-Type']
+    example_query = row['Exemple']
+    
+    # Vérifier si la définition du type a déjà été générée
+    if type_query in definitions_type:
+        df.at[index, 'Définition du type'] = definitions_type[type_query]
+    else:
+        definition_type = generate_text(f"Définition du type d'objet astronomique {type_query} en français:")
+        definitions_type[type_query] = definition_type
+        df.at[index, 'Définition du type'] = definition_type
+    
+    # Sauvegarder le fichier Excel mis à jour après chaque définition
+    df.to_excel(f'updated_table_with_definitions_{index + 1}_type.xlsx', index=False)
+    
+    # Vérifier si la définition du sous-type a déjà été générée
+    subtype_key = (type_query, subtype_query)
+    if subtype_key in definitions_subtype:
+        df.at[index, 'Définition du sous-type'] = definitions_subtype[subtype_key]
+    else:
+        definition_subtype = generate_text(f"Définition du sous-type d'objet astronomique {subtype_query} de type {type_query} en français:")
+        definitions_subtype[subtype_key] = definition_subtype
+        df.at[index, 'Définition du sous-type'] = definition_subtype
+    
+    # Sauvegarder le fichier Excel mis à jour après chaque définition
+    df.to_excel(f'updated_table_with_definitions_{index + 1}_subtype.xlsx', index=False)
+    
+    # Vérifier si la note explicative sur l'exemple a déjà été générée
+    example_key = (type_query, subtype_query, example_query)
+    if example_key in definitions_example:
+        df.at[index, 'Note explicative sur l\'exemple'] = definitions_example[example_key]
+    else:
+        definition_example = generate_text(f"Note explicative sur l'exemple d'objet astronomique {type_query}, {subtype_query}, {example_query} en français:")
+        definitions_example[example_key] = definition_example
+        df.at[index, 'Note explicative sur l\'exemple'] = definition_example
+    
+    # Sauvegarder le fichier Excel mis à jour après chaque définition
+    df.to_excel(f'updated_table_with_definitions_{index + 1}_example.xlsx', index=False)
+
+print("Traitement des lignes terminé. Sauvegarde du fichier Excel...")
+
+# Sauvegarder le fichier Excel final mis à jour
+df.to_excel('updated_table_with_definitions_final.xlsx', index=False)
+
+print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
 ### 2025-01-03 01h03
 Bien sûr ! Voici le script complet modifié pour générer une nouvelle version du fichier Excel après chaque définition demandée à LLaMA et réutiliser les définitions précédemment reçues pour les types déjà rencontrés :
 
@@ -91,9 +234,17 @@ print("Traitement des lignes terminé. Sauvegarde du fichier Excel...")
 df.to_excel('updated_table_with_definitions_final.xlsx', index=False)
 
 print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA en français.")
-```
+
 
 Ce script sauvegarde une nouvelle version du fichier Excel après chaque définition générée par LLaMA et réutilise les définitions précédemment reçues pour les types déjà rencontrés. Essayez cette version et voyez si cela répond à vos besoins. Si vous avez d'autres questions ou besoin d'aide supplémentaire, je suis là pour vous aider ! 😊
+
+# Médiagraphie
+Breakthrough Listen. (n.d.). Exotic Target Catalog. Récupéré de http://seti.berkeley.edu/exotica/
+Lacki, B. C., Lebofsky, M., Isaacson, H., Siemion, A., Sheikh, S., Croft, S., ... & Werthimer, D. (2020). One of Everything: The Breakthrough Listen Exotica Catalog. arXiv. Récupéré de https://arxiv.org/pdf/2006.11304.pdf
+TableConvert. (n.d.). Convert LaTeX Table to Excel Online. Récupéré de https://tableconvert.com/latex-to-excel
+
+#  Journal des modifications
+
 ### 2025-01-03 01h02
 Bien sûr ! Voici le script complet modifié pour générer une nouvelle version du fichier Excel après chaque définition demandée à LLaMA :
 
