@@ -5,12 +5,12 @@ import torch
 # Charger le fichier Excel
 df = pd.read_excel('updated_table.xlsx', engine='openpyxl')
 
-# Initialiser le modèle GPT-NeoX et le tokenizer
-model_name = "EleutherAI/gpt-neox-20b"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name)
+# Initialiser le modèle LLaMA 3 et le tokenizer
+model_name = "meta-llama/Meta-Llama-3-8B-Instruct"  # Remplacez par le chemin correct vers le modèle LLaMA 3
+tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=True)
+model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16, use_auth_token=True)
 
-# Fonction pour générer du texte avec GPT-NeoX en français
+# Fonction pour générer du texte avec LLaMA 3 en français
 def generate_text(prompt):
     inputs = tokenizer.encode(prompt, return_tensors="pt")
     attention_mask = torch.ones(inputs.shape, dtype=torch.long)
@@ -31,4 +31,4 @@ for index, row in df.iterrows():
 # Sauvegarder le fichier Excel mis à jour
 df.to_excel('updated_table_with_definitions.xlsx', index=False)
 
-print("Le fichier Excel a été mis à jour avec des définitions générées par GPT-NeoX en français.")
+print("Le fichier Excel a été mis à jour avec des définitions générées par LLaMA 3 en français.")
