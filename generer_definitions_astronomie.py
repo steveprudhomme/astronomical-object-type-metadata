@@ -29,7 +29,7 @@ for index, row in df.iterrows():
     
     df.at[index, 'Définition du type'] = generate_text(f"Définition du type d'objet astronomique {type_query} en français:")
     df.at[index, 'Définition du sous-type'] = generate_text(f"Définition du sous-type d'objet astronomique {subtype_query} de type {type_query} en français:")
-    df.at[index, 'Note explicative sur l'exemple'] = generate_text(f"Note explicative sur l'exemple de sous-type d'objets astronomiques {example_query} en français:")
+    df.at[index, 'Note explicative sur l'exemple'] = generate_text(f"Note explicative sur l'exemple d'objet astronomique {type_query}, {subtype_query}, {example_query} en français:")
 
 # Sauvegarder le fichier Excel mis à jour
 df.to_excel('updated_table_with_definitions.xlsx', index=False)
